@@ -1,8 +1,8 @@
 #!/bin/bash
 fn=${1}
 cd /pdfdir
-cp ${fn} ${fn%.*}_backup.pdf
-chmod a+r ${fn%.*}_backup.pdf
+cp "${fn}" "${fn%.*}_backup.pdf"
+chmod a+r "${fn%.*}_backup.pdf"
 rm -rf temp
 mkdir temp
 cd temp
