@@ -8,7 +8,7 @@ Build docker image: `docker build -t crop_scans .`
 
 ## Usage 
 
-Use the docker container for cropping images in PDF files. A backup of the input file is created and the input file will be overwritten with the cropped version.
+Use the docker container for cropping images in PDF files. A backup of the input file is created and the output file is the cropped version named cropped_{filename}.pdf. The input PDF file is sampled at 300 dpi.
 
 ### Example 
 
