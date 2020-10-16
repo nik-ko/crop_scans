@@ -3,34 +3,59 @@ fn=${1}
 cd /pdfdir
 cp "${fn}" "${fn%.*}_backup.pdf"
 chmod a+r "${fn%.*}_backup.pdf"
-rm -rf temp
-mkdir temp
-cd temp
+TEMPDIR=temp_${fn%.*}
+rm -rf $TEMPDIR
+mkdir $TEMPDIR
+cd $TEMPDIR
 cp ../${fn} .
 echo "Processing ${fn}"
-echo "Extracting images..."
-# convert -density 300 -define pdf:use-cropbox=true ${fn} -quality 90 image.jpg
-# convert -density 600 -define pdf:use-cropbox=true ${fn} image.jpg
-# Get maximum resolution (x)
-maxres=300
-res=0
-pdfimages -j -p ${fn} identifyimage 
-lines=$(ls identifyimage-*.jpg)
-while read l; do res=$(identify -format "%x" $l); maxres=$(( res > maxres ? res : maxres )); done <<< "$lines"
-echo "Resolution is $maxres dpi"
-rm *.jpg
-# pdftocairo -r $maxres -png ${fn}
-convert -density $maxres -define pdf:use-cropbox=true ${fn} -quality 100 image.png
-echo "Cropping images..."
-ls *.png | while read f; do convert $f -crop \
-    `convert $f -virtual-pixel edge -blur 0x6 -fuzz 4% \
-             -trim -format '%wx%h%O' info:`   +repage   cropped_${f%.*}.png; done
-cd ..
+num_pages=$(pdfinfo ${fn} | grep Pages | awk '{print $2}')
+echo "Processing $num_pages pages..."
+for page in `seq 1 ${num_pages}`;
+do
+	f=current_page.png
+	pdftoppm ${fn} current_page -f $page -r 300 -singlefile
+	unpaper --mask-color 0  --no-blurfilter --no-noisefilter --no-grayfilter --no-mask-scan --no-mask-center --no-deskew --no-wipe --no-border --no-border-scan --no-border-align  --overwrite current_page.ppm current_page.ppm
+	pnmtopng current_page.ppm > $f
+	w_src=$(identify -format "%w" $f)
+	h_src=$(identify -format "%h" $f)
+	dpi_w=300 
+	dpi_h=300
+	target=$(python3 /crop/get_crop_box.py)
+	echo $target $w_src $h_src $dpi_w $dpi_h
+	crop=$(python3 /crop/crop_margins.py $target $w_src $h_src $dpi_w $dpi_h)
+	echo Cropping to ${crop}
+	pdf_page=${fn}-$(printf "%04d" $page).pdf
+	pdfseparate -f $page -l $page ${fn} $pdf_page
+	pdfcrop --margins "${crop}" --clip $pdf_page $pdf_page
+
+done
+# echo "Cropping images..."
+# # Remove white border
+# page=1
+# ls *.png | while read f; do
+# w_src=$(identify -format "%w" $f)
+# h_src=$(identify -format "%h" $f)
+# dpi_w=$(identify -format "%x" $f)
+# dpi_h=$(identify -format "%y" $f)
+# target=$(convert $f -virtual-pixel edge -blur 0x6 -fuzz 4%   \
+# 	-trim -format '%wx%h%O' info:)   
+# echo $target $w_src $h_src $dpi_w $dpi_h
+# crop=$(python /crop/crop_margins.py $target $w_src $h_src $dpi_w $dpi_h)
+# echo Cropping to ${crop}...
+# pdf_page=${fn}-$(printf "%04d" $page).pdf
+# pdfseparate -f $page -l $page ${fn} $pdf_page
+# pdfcrop --margins "${crop}" --clip $pdf_page $pdf_page
+# let page=page+1 
+# done
+# #ls *.png | while read f; do convert $f -crop \
+#    `convert $f -virtual-pixel edge -blur 0x6 -fuzz 4% -v \
+#             -trim -format '%wx%h%O' info:`   +repage   cropped_${f%.*}.png; done
+ 
 echo "Building pdf..."
-# convert temp/cropped_*.jpg -quality 90 ${fn%.*}_cropped.pdf
-# convert temp/cropped_*.jpg -density 600 ${fn%.*}_cropped.pdf
-convert temp/cropped_*.png ${fn%.*}_cropped.pdf
-rm -rf temp
+rm ./${fn}
+pdfunite *.pdf ../${fn%.*}_cropped.pdf
+cd ..
+rm -rf "$TEMPDIR"
 echo "Finished."
 exit 0
-
