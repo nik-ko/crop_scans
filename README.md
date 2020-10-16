@@ -1,6 +1,6 @@
 # Crop scanned documents
 
-This tool uses several PDF and image processing tools ([unpaper](https://www.berlios.de/software/unpaper/), [pdfcrop](https://github.com/ho-tex/pdfcrop), pdfseparate, [poppler](https://poppler.freedesktop.org/),netpbm) and custom [OpenCV](https://opencv.org/) methods for robustly cropping scanned documents to a single textbox.
+This tool uses several PDF and image processing tools ([unpaper](https://www.berlios.de/software/unpaper/), [pdfcrop](https://github.com/ho-tex/pdfcrop), pdfseparate, [poppler](https://poppler.freedesktop.org/),netpbm, [ImageMagick](https://imagemagick.org/)) and custom [OpenCV](https://opencv.org/) methods for robustly cropping scanned documents to a single textbox.
 
 The workflow is realized in a [Docker](https://www.docker.com/) container and applied to a single PDF.
 
