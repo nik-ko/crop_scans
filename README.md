@@ -11,6 +11,11 @@ For `example_file.pdf` go to directory where the file is located:
 - Unix: `docker run --rm  -v $(pwd):/pdfdir hnko/crop_scans example_file.pdf`
 - Windows: `docker run --rm  -v %cd%:/pdfdir hnko/crop_scans example_file.pdf`
 
+For processing a whole directory containing PDFs go to directory and call:
+- Unix: `docker run --rm  -v $(pwd):/pdfdir hnko/crop_scans`
+- Windows: `docker run --rm  -v %cd%:/pdfdir hnko/crop_scans`
+
+
 ## Build (optional)
 
 Build docker image: `docker build -t crop_scans .`
