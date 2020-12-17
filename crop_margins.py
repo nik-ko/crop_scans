@@ -27,9 +27,18 @@ dpi_w = float(dpi_w)
 w_scale = convert_to_pt(w_src, dpi_w)
 h_scale = convert_to_pt(h_src, dpi_h)
 
-clips = [-convert_to_pt(x, dpi_w),
-         -convert_to_pt(y, dpi_h),
-         -convert_to_pt((w_src-w-x),dpi_w),
-         -convert_to_pt((h_src-h-y),dpi_h)
+# For CropBox: (left bottom right top)
+clips = [convert_to_pt(x, dpi_w),
+         convert_to_pt(h_src-y-h, dpi_h),
+         convert_to_pt((x+w),dpi_w),
+         convert_to_pt((h_src-y),dpi_h)
          ]# distance from left, top, right and bottom
 print ( " ".join( [ '%d' % round(x) for x in clips ]  ))
+
+# # For PDF crop: (distance from left, top, right and bottom)
+# clips = [-convert_to_pt(x, dpi_w),
+#          -convert_to_pt(y, dpi_h),
+#          -convert_to_pt((w_src-w-x),dpi_w),
+#          -convert_to_pt((h_src-h-y),dpi_h)
+#          ]# distance from left, top, right and bottom
+# print ( " ".join( [ '%d' % round(x) for x in clips ]  ))
