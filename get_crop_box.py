@@ -40,7 +40,7 @@ ret, thresh =  cv2.threshold(gray,244,255,cv2.THRESH_OTSU|cv2.THRESH_BINARY_INV)
 thresh  = cv2.adaptiveThreshold(thresh,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
             cv2.THRESH_BINARY,45,17) # cv2.THRESH_BINARY_INV
 thresh = 255-thresh
-rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (33, 66))
+rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (77, 77))
 thresh = cv2.dilate(thresh, rect_kernel, iterations = 3)
 thresh = cv2.erode(thresh, rect_kernel, iterations=3)
 contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)

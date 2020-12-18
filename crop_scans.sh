@@ -20,25 +20,25 @@ echo "${files}" | while read -r fn; do
   echo "Processing $num_pages pages..."
   for page in `seq 1 ${num_pages}`;
   do
-    f=current_page.png
-    pdftoppm "${fn}" current_page -f $page -r 300 -singlefile -q
-    # pdftoppm "${fn}" current_page$page -f $page -r 300 -singlefile -png
-    unpaper --mask-color 0  --no-blurfilter --no-noisefilter --no-grayfilter --no-mask-scan --no-mask-center --no-deskew --no-wipe --no-border --no-border-scan --no-border-align  --overwrite current_page.ppm current_page.ppm &> /dev/null
-    pnmtopng current_page.ppm > $f
-    w_src=$(identify -format "%w" $f)
-    h_src=$(identify -format "%h" $f)
-    dpi_w=300
-    dpi_h=300
-    target=$(python3 /crop/get_crop_box.py)
-    # echo $target $w_src $h_src $dpi_w $dpi_h
-    crop=$(python3 /crop/crop_margins.py $target $w_src $h_src $dpi_w $dpi_h)
-
     pdf_page="${fn}-$(printf "%04d" $page).pdf"
     pdfseparate -f $page -l $page "${fn}" "$pdf_page"
     # Crop only if no CropBox different from MediaBox has been defined already
     mediabox=$(pdfinfo -box -f $page -l $page "${fn}" | grep MediaBox | cut -d":" -f2 | xargs)
     cropbox=$(pdfinfo -box -f $page -l $page "${fn}" | grep CropBox | cut -d":" -f2 | xargs)
     if [[ $mediabox == $cropbox ]]; then
+      f=current_page.png
+      pdftoppm "${fn}" current_page -f $page -r 300 -singlefile -q
+      # pdftoppm "${fn}" current_page$page -f $page -r 300 -singlefile -png
+      unpaper --mask-color 0  --no-blurfilter --no-noisefilter --no-grayfilter --no-mask-scan --no-mask-center --no-deskew --no-wipe --no-border --no-border-scan --no-border-align  --overwrite current_page.ppm current_page.ppm &> /dev/null
+      pnmtopng current_page.ppm > $f
+      w_src=$(identify -format "%w" $f)
+      h_src=$(identify -format "%h" $f)
+      dpi_w=300
+      dpi_h=300
+      target=$(python3 /crop/get_crop_box.py)
+      # echo $target $w_src $h_src $dpi_w $dpi_h
+
+      crop=$(python3 /crop/crop_margins.py $target $w_src $h_src $dpi_w $dpi_h)
       echo Cropped page $page to [${crop}]
       sed -i 's/CropBox/cROPbOX/g' "$pdf_page"
       sed -i 's/TrimBox/tRIMbOX/g' "$pdf_page"
