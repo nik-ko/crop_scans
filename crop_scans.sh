@@ -80,7 +80,8 @@ echo "${files}" | while read -r fn; do
 
   echo "Merging cropped pages..."
   rm "./${fn}"
-  pdfunite cropped_*.pdf "../${fn%.*}_cropped.pdf"
+  # pdfunite cropped_*.pdf "../${fn%.*}_cropped.pdf" # Fails for large number of files!
+  qpdf  --empty --pages cropped_*.pdf -- "../${fn%.*}_cropped.pdf"
   cd ..
   rm -rf "$TEMPDIR"
   echo "Cropped file written to ${fn%.*}_cropped.pdf"
