@@ -8,8 +8,6 @@ else
 fi
 echo "Found "$(echo "${files}" | wc -l)" files, start cropping..."
 echo "${files}" | while read -r fn; do
-  #cp "${fn}" "${fn%.*}_backup.pdf"
-  #chmod a+r "${fn%.*}_backup.pdf"
   TEMPDIR=temp_${fn%.*}
   rm -rf "$TEMPDIR"
   mkdir "$TEMPDIR"
@@ -49,38 +47,15 @@ echo "${files}" | while read -r fn; do
         -o "cropped_$pdf_page" \
         -c "[/CropBox [$crop] /PAGES pdfmark" \
         -f "$pdf_page"
-      # pdfcrop --margins "${crop}" --clip "$pdf_page" "$pdf_page"  > /dev/null
     else
       mv "$pdf_page" "cropped_$pdf_page"
       echo "Page $page not cropped, found existing CropBox smaller than MediaBox"
     fi
   done
 
-  # echo "Cropping images..."
-  # # Remove white border
-  # page=1
-  # ls *.png | while read f; do
-  # w_src=$(identify -format "%w" $f)
-  # h_src=$(identify -format "%h" $f)
-  # dpi_w=$(identify -format "%x" $f)
-  # dpi_h=$(identify -format "%y" $f)
-  # target=$(convert $f -virtual-pixel edge -blur 0x6 -fuzz 4%   \
-  # 	-trim -format '%wx%h%O' info:)
-  # echo $target $w_src $h_src $dpi_w $dpi_h
-  # crop=$(python /crop/crop_margins.py $target $w_src $h_src $dpi_w $dpi_h)
-  # echo Cropping to ${crop}...
-  # pdf_page=${fn}-$(printf "%04d" $page).pdf
-  # pdfseparate -f $page -l $page ${fn} $pdf_page
-  # pdfcrop --margins "${crop}" --clip $pdf_page $pdf_page
-  # let page=page+1
-  # done
-  # #ls *.png | while read f; do convert $f -crop \
-  #    `convert $f -virtual-pixel edge -blur 0x6 -fuzz 4% -v \
-  #             -trim -format '%wx%h%O' info:`   +repage   cropped_${f%.*}.png; done
-
   echo "Merging cropped pages..."
   rm "./${fn}"
-  # pdfunite cropped_*.pdf "../${fn%.*}_cropped.pdf" # Fails for large number of files!
+  # pdfunite cropped_*.pdf "../${fn%.*}_cropped.pdf" # Fails for large number of files
   qpdf  --empty --pages cropped_*.pdf -- "../${fn%.*}_cropped.pdf"
   cd ..
   rm -rf "$TEMPDIR"
